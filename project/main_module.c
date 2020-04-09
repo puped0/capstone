@@ -41,8 +41,8 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		//readmsg(&sd, msg);
-		fgets(msg, BUFSIZE, stdin); 
+		readmsg(&sd, msg);
+		//fgets(msg, BUFSIZE, stdin); 
 		maketoken(msg, token);
 		
 
@@ -52,28 +52,22 @@ int main(int argc, char** argv)
 			int success = test(token[1]);
 			
 			if(success == 1)
-				printf("true\n");
-			//	write(sd.client_sock, "true", sizeof("true")-1);
+			//	printf("true\n");
+				write(sd.client_sock, "true", sizeof("true")-1);
 			else
-				printf("false\n");
-			//	write(sd.client_sock, "false", sizeof("false")-1);
+			//	printf("false\n");
+				write(sd.client_sock, "false", sizeof("false")-1);
 		}
 		/* 대본 시작 */
-		else if(atoi(token[0]) == 2)
-		{
-			printf("msg : 2\n");	
-		}
-		else if(atoi(token[0]) == 3)
-		{
-			printf("msg : 3\n");	
-		}
+//		else if(atoi(token[0]) == 2)
+//		else if(atoi(token[0]) == 3)
 		else
 		{
-	
+			write(sd.client_sock, msg, strlen(msg)-1);			
 		}
 		
-	//	close(sd.client_sock);
-	//	close(sd.server_sock);
+		close(sd.client_sock);
+		close(sd.server_sock);
 	}
 
 	return 0;
@@ -129,8 +123,6 @@ void readmsg(socketdata* sd, char* msg)
 
 	str_len = read(client_sock, msg, BUFSIZE);
 	msg[str_len] = '\0';
-	write(client_sock, msg, str_len);
-
 
 	sd->server_sock = server_sock;
 	sd->client_sock = client_sock;
