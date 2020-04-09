@@ -40,7 +40,8 @@ int main(int argc, char** argv)
 	char* token[10];
 
 	while(1)
-	{
+	{	
+		// ex) 1 192.168.0.138
 		readmsg(&sd, msg);
 		//fgets(msg, BUFSIZE, stdin); 
 		maketoken(msg, token);
