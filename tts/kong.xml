@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<format>
+	<title>콩쥐팥쥐</title>
+	
+	<header>
+		<version>1.0</version>
+		<numofactor>4</numofactor>
+		<numofadialogue>11</numofadialogue>
+		<numofline>11</numofline>
+	</header>
+	
+	<characters>
+		<character name="콩쥐" gender="여자" age="10"></character>
+		<character name="팥쥐" gender="여자" age="11"></character>
+		<character name="새엄마" gender="여자" age="35"></character>
+		<character name="나레이션" gender="남자" age="25"></character>
+	</characters>
+	
+	<script>
+		<dialogue index="1">
+			<actor>콩쥐</actor>
+			<line>아! 잘 잤다. 서둘러 아침을 해야지.</line>
+		</dialogue>
+		<dialogue index="2">
+			<actor>콩쥐</actor>
+			<line>엄마, 언니 일어나세요. 식사하세요.</line>
+		</dialogue>
+		<dialogue index="3">
+			<actor>새엄마</actor>
+			<line>조금 있다가 먹자. 미인은 잠꾸러기야.</line>
+		</dialogue>
+		<dialogue index="4">
+			<actor>콩쥐</actor>
+			<line>일어나세요. 9시가 넘었어요.</line>
+		</dialogue>
+		<dialogue index="5">
+			<actor>새엄마</actor>
+			<line>아이 귀찮게 하네</line>
+		</dialogue>
+		<dialogue index="6">
+			<actor>나레이션</actor>
+			<line>다 같이 식사를 하면서</line>
+		</dialogue>
+		<dialogue index="7">
+			<actor>새엄마</actor>
+			<line>콩쥐야! 오전에는 밭에 풀뽑고, 오후에는 산에가서 나물을 캐오거라.</line>
+		</dialogue>
+		<dialogue index="8">
+			<actor>콩쥐</actor>
+			<line>산에요? 무서워요.</line>
+		</dialogue>
+		<dialogue index="9">
+			<actor>새엄마</actor>
+			<line>콩쥐야 이 맛있는 생선 먹을래?. 이거 언니줘라 하나밖에 없는 언니가 먹고 싶다는구나.</line>
+		</dialogue>
+		<dialogue index="10">
+			<actor>팥쥐</actor>
+			<line>나 먹고 싶어.</line>
+		</dialogue>
+		<dialogue index="11">
+			<actor>콩쥐</actor>
+			<line>알았어요. 갔다올께요.</line>
+		</dialogue>
+	</script>
+</format>
