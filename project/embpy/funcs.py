@@ -16,3 +16,12 @@ def xmlparse():
 	c = root.findall('country')
 	print(c)
 	return 0
+
+def tts_ex(index, voice, line):
+    print(index, type(index))
+    print(voice, type(voice))
+    print(line, type(line))
+
+def print_line(line):
+    print("module : ", line)
+
