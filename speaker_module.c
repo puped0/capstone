@@ -85,13 +85,11 @@ int main()
 			arg.voice = token[1];
 			arg.line = token[2];
 		
-			printf("test1\n");	
 			if(createvoice(arg)==0)
 				printf("output%d.wav 생성완료\n", index);
 			else
 				printf("음성파일 생성 실패\n");
 
-			printf("test2\n");
 			index++;
 		}
 		// 이번 차례에 생성된 음성파일 재생
