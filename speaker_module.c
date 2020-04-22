@@ -35,8 +35,11 @@ void init(socketdata* sd);
 void readmsg(socketdata* sd, char* msg);
 int maketoken(char* msg, char** token);
 
-int createvoice(argument_tts arg);
+void* createvoice(void* data);
 void* speaking(void* data);
+
+pthread_t wav_create_thread[10];
+int wav_create_id[10];
 
 pthread_t speaker_thread;
 int speaker_id;
@@ -70,7 +73,7 @@ int main()
 		//////////////////////////
 
 		maketoken(msg, token);
-		
+
 		// 연결 확인 응답
 		if(atoi(token[0]) == 1)
 		{
@@ -80,15 +83,29 @@ int main()
 		else if(atoi(token[0]) == 2)
 		{
 			argument_tts arg;
-		
+
 			arg.index = index;
 			arg.voice = token[1];
 			arg.line = token[2];
-		
+			
+			/******************/
+			gilState = PyGILState_Ensure();
+			/******************/
+			
+			wav_create_id[index] = pthread_create(&wav_create_thread[index], NULL, createvoice, (void*)&arg);
+			if(wav_create_id[index] < 0)
+				perror("thread create error : ");
+			
+			/***************/
+			PyGILState_Release(gilState);
+			/***************/	
+
+			/*
 			if(createvoice(arg)==0)
 				printf("output%d.wav 생성완료\n", index);
 			else
 				printf("음성파일 생성 실패\n");
+			*/
 
 			index++;
 		}
@@ -121,7 +138,7 @@ int main()
 	PyEval_RestoreThread(mainThreadState);
 	if(Py_FinalizeEx() < 0)
 		return 120;
-	
+
 	close(sd.sock);
 	return 0;
 }
@@ -160,6 +177,7 @@ void init(socketdata* sd)
 	PyRun_SimpleString("os.environ[\"GOOGLE_APPLICATION_CREDENTIALS\"]=\"/home/pi/TTS capstone-d09b840abc51.json\"");
 
 	/********************************************/
+	Py_DECREF(PyImport_ImportModule("threading"));
 	PyEval_InitThreads();
 	mainThreadState = PyEval_SaveThread();
 	/********************************************/
@@ -186,8 +204,10 @@ int maketoken(char* msg, char** token)
 	return i;
 }
 
-int createvoice(argument_tts arg)
+void* createvoice(void* data)
 {
+	argument_tts arg;
+
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
 
@@ -195,10 +215,17 @@ int createvoice(argument_tts arg)
 	PyGILState_STATE gilState;
 	/*****************/
 
+	/********************************/
 	gilState = PyGILState_Ensure();
+	/********************************/
 
 	char module_name[20] = "tts";
 	char func_name[20] = "tts_func";
+
+	arg.index = ((argument_tts*)data)->index;
+	arg.voice = ((argument_tts*)data)->voice;
+	arg.line = ((argument_tts*)data)->line;
+
 
 	pName = PyUnicode_FromString(module_name);
 	pModule = PyImport_Import(pName);
@@ -217,7 +244,7 @@ int createvoice(argument_tts arg)
 				Py_DECREF(pArgs);
 				Py_DECREF(pModule);
 				fputs("cannot convert argument\n", stderr);
-				return -1;
+				return (void*)-1;
 			}
 			PyTuple_SetItem(pArgs, 0, pValue);
 
@@ -227,7 +254,7 @@ int createvoice(argument_tts arg)
 				Py_DECREF(pArgs);
 				Py_DECREF(pModule);
 				fputs("cannot convert argument\n", stderr);
-				return -1;
+				return (void*)-1;
 			}
 			PyTuple_SetItem(pArgs, 1, pValue);
 			
@@ -237,7 +264,7 @@ int createvoice(argument_tts arg)
 				Py_DECREF(pArgs);
 				Py_DECREF(pModule);
 				fputs("cannot convert argument\n", stderr);
-				return -1;
+				return (void*)-1;
 			}
 
 
@@ -256,7 +283,7 @@ int createvoice(argument_tts arg)
 				Py_DECREF(pModule);
 				PyErr_Print();
 				fputs("call failed\n", stderr);
-				return -1;
+				return (void*)-1;
 			}
 		}
 		else
@@ -274,9 +301,14 @@ int createvoice(argument_tts arg)
 			PyErr_Print();
 		fprintf(stdout, "failed to load \"%s\"\n", module_name);
 	}
+	
+	printf("output%d.wav 생성완료\n", arg.index);
 
+	/*****************************/
 	PyGILState_Release(gilState);
-	return 0;
+	/*****************************/
+
+	return (void*)0;
 }
 
 void* speaking(void* data)
@@ -288,12 +320,14 @@ void* speaking(void* data)
 
 	PyGILState_STATE gilState;
 
-	char module_name[20] = "tts";
-	char func_name[20] = "line_play";
-
 	/****************************/
 	gilState = PyGILState_Ensure();
 	/****************************/
+
+	char module_name[20] = "tts";
+	char func_name[20] = "line_play";
+
+	char msg[10];
 
 	pName = PyUnicode_FromString(module_name);
 	pModule = PyImport_Import(pName);
@@ -347,7 +381,8 @@ void* speaking(void* data)
 		fprintf(stdout, "failed to load \"%s\"\n", module_name);
 	}
 
-	sendto(sd.sock, "0", strlen("0")+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
+	sprintf(msg, "%d", index);
+	sendto(sd.sock, msg, strlen(msg)+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
 
 	/****************************/	
 	PyGILState_Release(gilState);
