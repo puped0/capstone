@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<format>
+	<title>테스트용스크립트</title>
+	
+	<header>
+		<version>1.0</version>
+		<numofactor>4</numofactor>
+		<numofadialogue>10</numofadialogue>
+		<numofline>20</numofline>
+	</header>
+	
+	<characters>
+		<character name="AAA" gender="여자" age="10"></character>
+		<character name="BBB" gender="여자" age="11"></character>
+		<character name="CCC" gender="여자" age="35"></character>
+		<character name="DDD" gender="남자" age="25"></character>
+	</characters>
+	
+	<script>
+		<dialogue index="1">
+			<actor>AAA</actor>
+			<line>테스트용 대본11</line>
+		</dialogue>
+		
+		<dialogue index="2">
+			<actor>BBB</actor>
+			<line>테스트용 대본21</line>
+		</dialogue>
+		<dialogue index="2">
+			<actor>AAA</actor>
+			<line>테스트용 대본22</line>
+		</dialogue>
+		
+		<dialogue index="3">
+			<actor>CCC</actor>
+			<line>테스트용 대본31</line>
+		</dialogue>
+		<dialogue index="3">
+			<actor>DDD</actor>
+			<line>테스트용 대본32</line>
+		</dialogue>
+		<dialogue index="3">
+			<actor>AAA</actor>
+			<line>테스트용 대본33</line>
+		</dialogue>
+		
+		<dialogue index="4">
+			<actor>DDD</actor>
+			<line>테스트용 대본41</line>
+		</dialogue>
+		<dialogue index="4">
+			<actor>AAA</actor>
+			<line>테스트용 대본42</line>
+		</dialogue>
+		<dialogue index="4">
+			<actor>BBB</actor>
+			<line>테스트용 대본43</line>
+		</dialogue>
+		<dialogue index="4">
+			<actor>CCC</actor>
+			<line>테스트용 대본44</line>
+		</dialogue>
+		
+		<dialogue index="5">
+			<actor>CCC</actor>
+			<line>테스트용 대본51</line>
+		</dialogue>
+		
+		<dialogue index="6">
+			<actor>DDD</actor>
+			<line>테스트용 대본61</line>
+		</dialogue>
+		
+		<dialogue index="7">
+			<actor>CCC</actor>
+			<line>테스트용 대본71</line>
+		</dialogue>
+		
+		<dialogue index="8">
+			<actor>CCC</actor>
+			<line>테스트용 대본81</line>
+		</dialogue>
+		<dialogue index="8">
+			<actor>AAA</actor>
+			<line>테스트용 대본82</line>
+		</dialogue>
+		
+		<dialogue index="9">
+			<actor>CCC</actor>
+			<line>테스트용 대본91</line>
+		</dialogue>
+		<dialogue index="9">
+			<actor>BBB</actor>
+			<line>테스트용 대본92</line>
+		</dialogue>
+		
+		<dialogue index="10">
+			<actor>CCC</actor>
+			<line>테스트용 대본101</line>
+		</dialogue>
+		<dialogue index="10">
+			<actor>AAA</actor>
+			<line>테스트용 대본102</line>
+		</dialogue>
+		<dialogue index="10">
+			<actor>DDD</actor>
+			<line>테스트용 대본103</line>
+		</dialogue>
+	</script>
+</format>
