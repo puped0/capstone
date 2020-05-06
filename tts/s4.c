@@ -60,11 +60,13 @@ int main(int argc, char** argv)
 */
 	init();
 
+	/*
 	for(int i=0; i<s->numofline; i++)
 	{
 		calltts(s->dls[i].line);
 		printf("%d.%s : %s\n", s->dls[i].index, s->dls[i].actor, s->dls[i].line);
 	}
+	*/
 
 	free(s->dls);
 	free(s->chs);
@@ -112,7 +114,7 @@ story* parsedoc(char* docname)
 		xmlFreeDoc(doc);
 		return NULL;
 	}
-		
+	
 	cur = cur->xmlChildrenNode;
 
 	while(cur != NULL)
@@ -129,7 +131,7 @@ story* parsedoc(char* docname)
 			parsecharacters(doc, cur, s);
 		else if(!xmlStrcmp(cur->name, (const xmlChar*)"script"))
 			parsescript(doc, cur, s);
-
+		
 		cur = cur->next;
 	}
 	xmlFreeDoc(doc);
@@ -140,6 +142,7 @@ void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s)
 {
 	cur = cur->xmlChildrenNode;
 	cur = cur->next;
+	
 	xmlChar* version = xmlNodeGetContent(cur);
 	cur = cur->next->next;
 	xmlChar* numofactor = xmlNodeGetContent(cur);
@@ -147,7 +150,7 @@ void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	xmlChar* numofdialogue = xmlNodeGetContent(cur);
 	cur = cur->next->next;
 	xmlChar* numofline = xmlNodeGetContent(cur);
-
+	
 	s->version = atof(version);
 	s->numofactor = atoi(numofactor);
 	s->numofdialogue = atoi(numofdialogue);
@@ -212,9 +215,13 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	{
 		if(!xmlStrcmp(cur->name, (const xmlChar*)"dialogue"))
 		{
-			xmlNodePtr child = cur->xmlChildrenNode;
 
+			xmlNodePtr child = cur->xmlChildrenNode;
+			
+			// cur 즉 <dialogue> 태그의 index 속성을 읽어옴
 			index = xmlGetProp(cur, "index");
+			
+			// <dialogue>내부의 <actor>, <line>의 요소 읽음
 			child = child->next;
 			actor = xmlNodeGetContent(child);
 			child = child->next->next;

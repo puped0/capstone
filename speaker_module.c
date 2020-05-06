@@ -64,6 +64,7 @@ int main()
 
 	while(1)
 	{
+		printf("reading msg...\n");
 		readmsg(&sd, msg);
 		
 		//////////////////////////
@@ -77,6 +78,7 @@ int main()
 		// 연결 확인 응답
 		if(atoi(token[0]) == 1)
 		{
+			printf("connection check\n");
 			sendto(sd.sock, "0", strlen("0")+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
 		}
 		// 대사 받아서 음성파일 생성
@@ -127,9 +129,11 @@ int main()
 		}
 		else if(atoi(token[0]) == 100)
 			break;
-		else
+		else // 없어도 됨 디버깅용
 		{
 			printf("receive : %s\n", msg);
+			
+			sd.client_addr.sin_port = htons(10002);
 			sendto(sd.sock, msg, strlen(msg)+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
 		}
 	}
@@ -382,6 +386,8 @@ void* speaking(void* data)
 	}
 
 	sprintf(msg, "%d", index);
+	
+	sd.client_addr.sin_port = htons(10002);
 	sendto(sd.sock, msg, strlen(msg)+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
 
 	/****************************/	
