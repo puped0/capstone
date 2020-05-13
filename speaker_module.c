@@ -26,8 +26,8 @@ typedef struct tagsocketdata
 typedef struct tagargument_tts
 {
 	int index;
-	char* voice;
-	char* line;
+	char voice[20];
+	char line[500];
 }argument_tts;
 
 void error_handling(char* msg);
@@ -58,13 +58,14 @@ int main()
 	char msg[BUFSIZE];
 	char* token[10];
 
+	argument_tts* arg;
+
 	/*****************************/
 	PyGILState_STATE gilState;
 	/*****************************/
 
 	while(1)
 	{
-		printf("reading msg...\n");
 		readmsg(&sd, msg);
 		
 		//////////////////////////
@@ -84,17 +85,17 @@ int main()
 		// 대사 받아서 음성파일 생성
 		else if(atoi(token[0]) == 2)
 		{
-			argument_tts arg;
+			arg = (argument_tts*)malloc(sizeof(argument_tts));
 
-			arg.index = index;
-			arg.voice = token[1];
-			arg.line = token[2];
-			
+			arg->index = index;
+			strcpy(arg->voice, token[1]);
+			strcpy(arg->line, token[2]);
+
 			/******************/
 			gilState = PyGILState_Ensure();
 			/******************/
-			
-			wav_create_id[index] = pthread_create(&wav_create_thread[index], NULL, createvoice, (void*)&arg);
+		
+			wav_create_id[index] = pthread_create(&wav_create_thread[index], NULL, createvoice, (void*)arg);
 			if(wav_create_id[index] < 0)
 				perror("thread create error : ");
 			
@@ -140,6 +141,8 @@ int main()
 
 
 	PyEval_RestoreThread(mainThreadState);
+
+	PyRun_SimpleString("pygame.mixer.quit()");
 	if(Py_FinalizeEx() < 0)
 		return 120;
 
@@ -179,6 +182,9 @@ void init(socketdata* sd)
 	
 	PyRun_SimpleString("import os");
 	PyRun_SimpleString("os.environ[\"GOOGLE_APPLICATION_CREDENTIALS\"]=\"/home/pi/TTS capstone-d09b840abc51.json\"");
+	PyRun_SimpleString("import pygame");
+	PyRun_SimpleString("import time");
+	PyRun_SimpleString("pygame.mixer.init(24000, -16, 1, 2048)");
 
 	/********************************************/
 	Py_DECREF(PyImport_ImportModule("threading"));
@@ -197,12 +203,12 @@ void readmsg(socketdata* sd, char* msg)
 int maketoken(char* msg, char** token)
 {
 	int i = 0;
-	char* ptr = strtok(msg, ",");
+	char* ptr = strtok(msg, "_");
 
 	while(ptr != NULL)
 	{
 		token[i] = ptr;
-		ptr = strtok(NULL, ",");
+		ptr = strtok(NULL, "_");
 		i++;
 	}
 	return i;
@@ -210,7 +216,7 @@ int maketoken(char* msg, char** token)
 
 void* createvoice(void* data)
 {
-	argument_tts arg;
+	argument_tts* arg;
 
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
@@ -226,10 +232,7 @@ void* createvoice(void* data)
 	char module_name[20] = "tts";
 	char func_name[20] = "tts_func";
 
-	arg.index = ((argument_tts*)data)->index;
-	arg.voice = ((argument_tts*)data)->voice;
-	arg.line = ((argument_tts*)data)->line;
-
+	arg = (argument_tts*)data;
 
 	pName = PyUnicode_FromString(module_name);
 	pModule = PyImport_Import(pName);
@@ -242,7 +245,7 @@ void* createvoice(void* data)
 		{
 			pArgs = PyTuple_New(3);
 			
-			pValue = PyLong_FromLong(arg.index);
+			pValue = PyLong_FromLong(arg->index);
 			if(!pValue)
 			{
 				Py_DECREF(pArgs);
@@ -252,7 +255,7 @@ void* createvoice(void* data)
 			}
 			PyTuple_SetItem(pArgs, 0, pValue);
 
-			pValue = PyUnicode_FromString(arg.voice);
+			pValue = PyUnicode_FromString(arg->voice);
 			if(!pValue)
 			{
 				Py_DECREF(pArgs);
@@ -262,7 +265,7 @@ void* createvoice(void* data)
 			}
 			PyTuple_SetItem(pArgs, 1, pValue);
 			
-			pValue = PyUnicode_FromString(arg.line);
+				pValue = PyUnicode_FromString(arg->line);
 			if(!pValue)
 			{
 				Py_DECREF(pArgs);
@@ -278,7 +281,7 @@ void* createvoice(void* data)
 			
 			if(pValue != NULL)
 			{
-				printf("Result of call : %ld(from python module)\n");
+			//	printf("Result of call : %ld(from python module)\n");
 				Py_DECREF(pValue);
 			}
 			else
@@ -306,7 +309,9 @@ void* createvoice(void* data)
 		fprintf(stdout, "failed to load \"%s\"\n", module_name);
 	}
 	
-	printf("output%d.wav 생성완료\n", arg.index);
+	printf("output%d.wav 생성완료\n", arg->index);
+
+	free(data);
 
 	/*****************************/
 	PyGILState_Release(gilState);
@@ -357,7 +362,7 @@ void* speaking(void* data)
 			pValue = PyObject_CallObject(pFunc, pArgs);
 			if(pValue != NULL)
 			{
-				printf("Result of call : %ld(from python module)\n");
+			//	printf("Result of call : %ld(from python module)\n");
 				Py_DECREF(pValue);
 			}
 			else
