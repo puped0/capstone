@@ -1,4 +1,8 @@
 import pygame
+<<<<<<< HEAD
+=======
+from google.cloud import texttospeech
+>>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 
 def tts_func(line):
     from google.cloud import texttospeech
@@ -12,11 +16,19 @@ def tts_func(line):
     audio_config = texttospeech.types.AudioConfig(
             audio_encoding=texttospeech.enums.AudioEncoding.MP3)	
     response = client.synthesize_speech(input, voice, audio_config)
+<<<<<<< HEAD
 
     with open('output.mp3', 'wb') as out:
     # Write the response to the output file.
         out.write(response.audio_content)
 	
+=======
+    
+    with open('output.mp3', 'wb') as out:
+    # Write the response to the output file.
+        out.write(response.audio_content)
+
+>>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
     music_file = 'output.mp3'
 
     freq = 24000    # sampling rate, 44100(CD), 16000(Naver TTS), 24000(google TTS

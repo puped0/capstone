@@ -80,6 +80,10 @@ int main(int argc, char** argv)
 	while(1)
 	{
 		str_len = read(client_sock, msg, BUFSIZE);
+<<<<<<< HEAD
+=======
+		write(client_sock, "", 1);
+>>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	//	fputs("전달받은 메시지 : ", stdout);
 		fputs(msg, stdout);
 		fputc('\n', stdout);

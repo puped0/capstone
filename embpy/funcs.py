@@ -16,3 +16,15 @@ def xmlparse():
 	c = root.findall('country')
 	print(c)
 	return 0
+<<<<<<< HEAD
+=======
+
+def tts_ex(index, voice, line):
+    print(index, type(index))
+    print(voice, type(voice))
+    print(line, type(line))
+
+def print_line(line):
+    print("module : ", line)
+
+>>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e

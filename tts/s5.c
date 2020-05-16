@@ -8,6 +8,7 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <Python.h>
+#include <pthread.h>
 
 typedef struct tagcharacter
 {
@@ -41,7 +42,7 @@ story* parsedoc(char* docname);
 void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s);
 void parsecharacters(xmlDocPtr doc, xmlNodePtr cur, story* s);
 void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s);
-int calltts(char*);
+void* calltts(void*);
 
 int main(int argc, char** argv)
 {
@@ -50,44 +51,32 @@ int main(int argc, char** argv)
 	story* s;
 	s = parsedoc(docname);
 
-<<<<<<< HEAD
-	
-=======
+	pthread_t th;
+	int th_id;
+	int status;
+
 	/*
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	printf("%s\n", s->title);
 	printf("%lf, %d, %d, %d\n", s->version, s->numofactor, s->numofdialogue, s->numofline);
 	for(int i=0; i<s->numofactor;i++)
 		printf("%s, %d, %d\n", s->chs[i].name, s->chs[i].gender, s->chs[i].age);
 	for(int i=0; i<s->numofline;i++)
 		printf("%d. %s : %s\n", s->dls[i].index, s->dls[i].actor, s->dls[i].line);
-<<<<<<< HEAD
-
-	
-=======
 */
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	init();
 
-	/*
 	for(int i=0; i<s->numofline; i++)
 	{
-		calltts(s->dls[i].line);
+		//calltts(s->dls[i].line);
+		th_id = pthread_create(&th, NULL, calltts, (void*)(s->dls[i].line));
+		pthread_join(th, (void**)&status);	
 		printf("%d.%s : %s\n", s->dls[i].index, s->dls[i].actor, s->dls[i].line);
 	}
-<<<<<<< HEAD
-=======
-	*/
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 
 	free(s->dls);
 	free(s->chs);
 	free(s);
-<<<<<<< HEAD
-*/
-=======
 
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	if(Py_FinalizeEx()<0)
 		return 120;
 
@@ -130,11 +119,7 @@ story* parsedoc(char* docname)
 		xmlFreeDoc(doc);
 		return NULL;
 	}
-<<<<<<< HEAD
 		
-=======
-	
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	cur = cur->xmlChildrenNode;
 
 	while(cur != NULL)
@@ -151,11 +136,7 @@ story* parsedoc(char* docname)
 			parsecharacters(doc, cur, s);
 		else if(!xmlStrcmp(cur->name, (const xmlChar*)"script"))
 			parsescript(doc, cur, s);
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 		cur = cur->next;
 	}
 	xmlFreeDoc(doc);
@@ -166,10 +147,6 @@ void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s)
 {
 	cur = cur->xmlChildrenNode;
 	cur = cur->next;
-<<<<<<< HEAD
-=======
-	
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	xmlChar* version = xmlNodeGetContent(cur);
 	cur = cur->next->next;
 	xmlChar* numofactor = xmlNodeGetContent(cur);
@@ -177,11 +154,7 @@ void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	xmlChar* numofdialogue = xmlNodeGetContent(cur);
 	cur = cur->next->next;
 	xmlChar* numofline = xmlNodeGetContent(cur);
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	s->version = atof(version);
 	s->numofactor = atoi(numofactor);
 	s->numofdialogue = atoi(numofdialogue);
@@ -246,19 +219,9 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	{
 		if(!xmlStrcmp(cur->name, (const xmlChar*)"dialogue"))
 		{
-<<<<<<< HEAD
 			xmlNodePtr child = cur->xmlChildrenNode;
 
 			index = xmlGetProp(cur, "index");
-=======
-
-			xmlNodePtr child = cur->xmlChildrenNode;
-			
-			// cur 즉 <dialogue> 태그의 index 속성을 읽어옴
-			index = xmlGetProp(cur, "index");
-			
-			// <dialogue>내부의 <actor>, <line>의 요소 읽음
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 			child = child->next;
 			actor = xmlNodeGetContent(child);
 			child = child->next->next;
@@ -279,7 +242,7 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	}
 }
 
-int calltts(char* line)
+void* calltts(void* line)
 {
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
@@ -304,23 +267,21 @@ int calltts(char* line)
 		if(pFunc && PyCallable_Check(pFunc))
 		{
 			pArgs = PyTuple_New(1);
-			pValue = PyUnicode_FromString(line);
+			pValue = PyUnicode_FromString((char*)line);
 			if(!pValue)
 			{
 				Py_DECREF(pArgs);
 				Py_DECREF(pModule);
 				fprintf(stderr, "Cannot convert argument\n");
-				return 1;
+				return NULL;
 			}
 
 			PyTuple_SetItem(pArgs, 0, pValue);
-<<<<<<< HEAD
-
-=======
 			
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
+			printf("test1\n");			
 			pValue = PyObject_CallObject(pFunc, pArgs);
-			
+			printf("test2\n");	
+
 			if(pValue != NULL)
 			{
 				printf("Result of call : %ld(from python module)\n", PyLong_AsLong(pValue));
@@ -332,7 +293,7 @@ int calltts(char* line)
 				Py_DECREF(pModule);
 				PyErr_Print();
 				fprintf(stderr, "Call failed\n");
-				return 1;
+				return NULL;
 			}
 		}
 		else
@@ -341,27 +302,22 @@ int calltts(char* line)
 				PyErr_Print();
 			fprintf(stderr, "Cannot find function \"%s\"\n", func_name);
 		}
-<<<<<<< HEAD
-			Py_XDECREF(pFunc);
-			Py_DECREF(pModule);
-=======
 
 		Py_XDECREF(pFunc);	
 		Py_DECREF(pModule);
->>>>>>> 74e8d524d90b7821b1ea78896a04a61b7ba97b6e
 	}
 	else
 	{
 		if(PyErr_Occurred())
 			PyErr_Print();
 		fprintf(stderr, "Failed to load \"%s\"\n", module_name);
-		return 1;
+		return NULL;
 	}
 
 //	if(Py_FinalizeEx()<0)
 //		return 120;
 
-	return 0;
+	return NULL;
 }
 
 int init()
