@@ -17,92 +17,92 @@
 	</characters>
 	
 	<script>
-		<dialogue index="1">
+		<dialogue index="0">
 			<actor>AAA</actor>
 			<line>테스트용 대본11</line>
 		</dialogue>
 		
-		<dialogue index="2">
+		<dialogue index="1">
 			<actor>BBB</actor>
 			<line>테스트용 대본21</line>
 		</dialogue>
-		<dialogue index="2">
+		<dialogue index="1">
 			<actor>AAA</actor>
 			<line>테스트용 대본22</line>
 		</dialogue>
 		
-		<dialogue index="3">
+		<dialogue index="2">
 			<actor>CCC</actor>
 			<line>테스트용 대본31</line>
 		</dialogue>
-		<dialogue index="3">
+		<dialogue index="2">
 			<actor>DDD</actor>
 			<line>테스트용 대본32</line>
 		</dialogue>
-		<dialogue index="3">
+		<dialogue index="2">
 			<actor>AAA</actor>
 			<line>테스트용 대본33</line>
 		</dialogue>
 		
-		<dialogue index="4">
+		<dialogue index="3">
 			<actor>DDD</actor>
 			<line>테스트용 대본41</line>
 		</dialogue>
-		<dialogue index="4">
+		<dialogue index="3">
 			<actor>AAA</actor>
 			<line>테스트용 대본42</line>
 		</dialogue>
-		<dialogue index="4">
+		<dialogue index="3">
 			<actor>BBB</actor>
 			<line>테스트용 대본43</line>
 		</dialogue>
-		<dialogue index="4">
+		<dialogue index="3">
 			<actor>CCC</actor>
 			<line>테스트용 대본44</line>
 		</dialogue>
 		
-		<dialogue index="5">
+		<dialogue index="4">
 			<actor>CCC</actor>
 			<line>테스트용 대본51</line>
 		</dialogue>
 		
-		<dialogue index="6">
+		<dialogue index="5">
 			<actor>DDD</actor>
 			<line>테스트용 대본61</line>
 		</dialogue>
 		
-		<dialogue index="7">
+		<dialogue index="6">
 			<actor>CCC</actor>
 			<line>테스트용 대본71</line>
 		</dialogue>
 		
-		<dialogue index="8">
+		<dialogue index="7">
 			<actor>CCC</actor>
 			<line>테스트용 대본81</line>
 		</dialogue>
-		<dialogue index="8">
+		<dialogue index="7">
 			<actor>AAA</actor>
 			<line>테스트용 대본82</line>
 		</dialogue>
 		
-		<dialogue index="9">
+		<dialogue index="8">
 			<actor>CCC</actor>
 			<line>테스트용 대본91</line>
 		</dialogue>
-		<dialogue index="9">
+		<dialogue index="8">
 			<actor>BBB</actor>
 			<line>테스트용 대본92</line>
 		</dialogue>
 		
-		<dialogue index="10">
+		<dialogue index="9">
 			<actor>CCC</actor>
 			<line>테스트용 대본101</line>
 		</dialogue>
-		<dialogue index="10">
+		<dialogue index="9">
 			<actor>AAA</actor>
 			<line>테스트용 대본102</line>
 		</dialogue>
-		<dialogue index="10">
+		<dialogue index="9">
 			<actor>DDD</actor>
 			<line>테스트용 대본103</line>
 		</dialogue>

@@ -31,6 +31,8 @@ typedef struct tagcharacter
 	char* voice;
 	int gender;
 	int age;
+
+	int speaker;
 }character;
 
 typedef struct tagdialogue
@@ -64,6 +66,9 @@ story* parsedoc(char* docname);
 void parseheader(xmlDocPtr doc, xmlNodePtr cur, story* s);
 void parsecharacters(xmlDocPtr doc, xmlNodePtr cur, story* s);
 void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s);
+
+int parserole(char* docname, story* s);
+
 void check_connection(char* testip);
 
 void* playstory(void* data);
@@ -77,6 +82,9 @@ int player_id;
 
 char ip[10][20];
 int ip_count;
+
+int ispause;
+int isstop;
 
 int main()
 {
@@ -110,9 +118,18 @@ int main()
 				exit(0);
 			}
 		}
-		// 정지, 재생, 앞으로, 뒤로 등등...
-		else if(atoi(token[0]) == 3){}
-		else if(atoi(token[0]) == 4){}
+		else if(atoi(token[0]) == 3)
+		{
+			// 일시정지
+		}
+		else if(atoi(token[0]) == 4)
+		{
+			// 일시정지 상태에서 재생
+		}
+		else if(atoi(token[0]) == 5)
+		{
+			// 대본 완전 정지
+		}
 		else if(atoi(token[0]) == 100)
 		{
 			for(i=0; i<ip_count; i++)
@@ -192,26 +209,7 @@ void init()
 	if(bind(recv_sd.server_sock, (struct sockaddr*)&(recv_sd.server_addr), sizeof(struct sockaddr_in)) == -1)
 		error_handling("bind() error");
 
-	///////////////////////////////
 
-	/*
-	 * ip관련 xml파일을 읽고 읽은 ip로 udp 소켓을 만듬
-	 */
-
-	///////////////////////////
-	// 192.168.0.138
-	/*
-	speaker_sd[0].server_sock = socket(PF_INET, SOCK_DGRAM, 0);
-	if(speaker_sd[0].server_sock == -1)
-		error_handling("socket() error(udp)");
-
-	memset(&(speaker_sd[0].server_addr), 0, sizeof(struct sockaddr_in));
-	speaker_sd[0].server_addr.sin_family = AF_INET;
-	speaker_sd[0].server_addr.sin_addr.s_addr = inet_addr("192.168.0.138");
-	speaker_sd[0].server_addr.sin_port = htons(10001);
-
-	speaker_sd[0].client_addr_size = sizeof(struct sockaddr_in);
-	*/
 
 	ip_count = 0;
 
@@ -237,10 +235,14 @@ void init()
 		if(!xmlStrcmp(cur->name, (const xmlChar*)"ip"))
 		{
 			content = xmlNodeGetContent(cur);
-			strncpy(ip[ip_count], content, sizeof(ip[0]));
-			xmlFree(content);
+			
+			if(xmlStrcmp(content, (const xmlChar*)"init"))
+			{
+				strncpy(ip[ip_count], content, sizeof(ip[0]));
+				ip_count++;
+			}
 
-			ip_count++;
+			xmlFree(content);
 		}
 
 		cur = cur->next;
@@ -349,6 +351,7 @@ story* parsedoc(char* docname)
 
 		cur = cur->next;
 	}
+
 	xmlFreeDoc(doc);
 	return s;
 }
@@ -463,6 +466,7 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 			else
 				linecount++;
 
+			
 			xmlFree(index);
 			xmlFree(actor);
 			xmlFree(line);
@@ -543,8 +547,15 @@ void check_connection(char* testip)
 
 void* playstory(void* data)
 {
-	char* docname = (char*)data;
+	char* title = (char*)data;
+	char docname[100];
+
+	strncpy(docname, title, sizeof(docname));
+	strcat(docname, ".xml");
+	
 	story* s = parsedoc(docname);
+	if(s == NULL)
+		return NULL;
 
 	int numofactor = s->numofactor;
 	int numofdialogue = s->numofdialogue;
@@ -558,9 +569,20 @@ void* playstory(void* data)
 
 	char* line;
 	char* voice;
+	int speaker_idx;
 
 	char buf[BUFSIZE];
 	int i;
+
+	if(parserole(title, s) == -1)
+	{
+		free(s->dls);
+		free(s->chs);
+		free(s->linecount_per_dialogue);
+		free(s);
+
+		return NULL;
+	}
 
 	for(i=0; i<numofactor; i++)
 	{
@@ -581,19 +603,35 @@ void* playstory(void* data)
 		}
 	}
 
+	/*
+	printf("%s\n", s->title);
+	printf("%lf, %d, %d, %d\n", s->version, s->numofactor, s->numofdialogue, s->numofline);
+	for(int i=0; i<s->numofactor;i++)
+		printf("%s, %s, %d, %d, %d\n", s->chs[i].name, s->chs[i].voice, s->chs[i].gender, s->chs[i].age, s->chs[i].speaker);
+
+	for(int i=0; i<s->numofline; i++)
+		printf("%d. %s : %s\n", s->dls[i].index, s->chs[s->dls[i].actor].name, s->dls[i].line);
+
+	for(int i=0; i<s->numofdialogue; i++)
+		printf("%d ", s->linecount_per_dialogue[i]);
+	printf("\n");
+	*/
+
+	
 	while(current_dialogue == s->dls[current_line].index)
 	{
 		voice = s->chs[s->dls[current_line].actor].voice;
 		line = s->dls[current_line].line;
-		
+		speaker_idx = s->chs[s->dls[current_line].actor].speaker;
+
 		current_line++;
 		current_line_count++;
 
 		sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-		printf("%s\n", buf);
+		printf("%d : %s\n",speaker_idx, buf);
 
-		sendto(speaker_sd[0].server_sock, buf, strlen(buf)+1, 0,
-			(struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
+		sendto(speaker_sd[speaker_idx].server_sock, buf, strlen(buf)+1, 0,
+			(struct sockaddr*)&(speaker_sd[speaker_idx].server_addr), sizeof(struct sockaddr_in));
 
 		usleep(100000);
 	}
@@ -604,28 +642,29 @@ void* playstory(void* data)
 	prev_line_count = current_line_count;
 	current_line_count = 0;
 
-	sleep(5);
+	sleep(3);
 
 	while(1)
 	{
 		int line_sum = 0;
 
 		sendto(speaker_sd[0].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
-
+		
 
 		while(current_dialogue == s->dls[current_line].index && current_dialogue != numofdialogue)
 		{
 			voice = s->chs[s->dls[current_line].actor].voice;
 			line = s->dls[current_line].line;
+			speaker_idx = s->chs[s->dls[current_line].actor].speaker;
 
 			current_line++;
 			current_line_count++;
 
 			sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-			printf("%s\n", buf);
+			printf("%d : %s\n",speaker_idx, buf);
 			
 			// 역할별로 다른 스피커에 전송할 수도 있음... 추후 구현
-			sendto(speaker_sd[0].server_sock, buf, strlen(buf)+1, 0, (struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
+			sendto(speaker_sd[speaker_idx].server_sock, buf, strlen(buf)+1, 0, (struct sockaddr*)&(speaker_sd[speaker_idx].server_addr), sizeof(struct sockaddr_in));
 			
 			usleep(100000);	
 		}
@@ -645,8 +684,7 @@ void* playstory(void* data)
 		if(prev_line_count == 0)
 			break;
 	}
-
-
+	
 
 	printf("end story\n");
 
@@ -656,157 +694,110 @@ void* playstory(void* data)
 	free(s);
 }
 
-
-
-/*
-void* playstory(void* data)
+int parserole(char* docname, story* s)
 {
-	char* docname = (char*)data;
-	story* s = parsedoc(docname);
+	xmlDocPtr doc;
+	xmlNodePtr tag_script;
+	
+	xmlNodePtr act;
+	xmlNodePtr userchoice;
+
+	xmlChar* title;
+
+	xmlChar* actor;
+	xmlChar* index;
 
 	int numofactor = s->numofactor;
-	int numofdialogue = s->numofdialogue;
-	int numofline = s->numofline;
-
-	int index = 0;
-	int current_line = 0;
-
 	int i;
 
-	char* voice;
-	char* line;
-	int cur_line_count = 0;
-	int prev_line_count = 0;
 
-	char buf[BUFSIZE];
-
-	for(i=0; i<numofactor; i++)
+	doc = xmlParseFile("role.xml");
+	if(doc == NULL)
 	{
-		if(s->chs[i].gender == 1)
-		{
-			if(s->chs[i].age < 20)
-				s->chs[i].voice = "A";
-			else
-				s->chs[i].voice = "B";
-		}
-		else
-		{
-			if(s->chs[i].age <20)
-				s->chs[i].voice = "C";
-			else
-				s->chs[i].voice = "D";
-
-		}
+		fprintf(stderr, "Document not parsed successfully.\n");
+		return -1;
 	}
-*/
 
-	/*
-	while(1)
+	tag_script = xmlDocGetRootElement(doc);
+
+	if(tag_script == NULL)
 	{
-		if(current_line!=0)
+		fprintf(stderr, "empty document.\n");
+		xmlFreeDoc(doc);
+		return -1;
+	}
+
+	if(xmlStrcmp(tag_script->name, (const xmlChar*)"scriptList"))
+	{
+		fprintf(stderr, "document of the wrong type, root node != scriptList");
+
+		xmlFree(doc);
+		return -1;
+	}
+
+	tag_script = tag_script->xmlChildrenNode;
+	
+
+	while(tag_script != NULL)
+	{
+		if(!xmlStrcmp(tag_script->name, (const xmlChar*)"script"))
 		{
-			sendto(speaker_sd[0].server_sock, "3", strlen("3")+1, 0,
-				(struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
-		}
-		
-		if(current_line != numofline)
-		{
-			while(1)
+			act = tag_script->xmlChildrenNode->next;
+			title = xmlNodeGetContent(act);
+
+			if(!xmlStrcmp(title, (const xmlChar*)docname))
 			{
-				if(index == s->dls[current_line].index)
+				
+				act = act->next->next;
+				userchoice = act->next->next->xmlChildrenNode->next->next->next;
+				act = act->xmlChildrenNode->next;
+
+				while(act != NULL || userchoice != NULL)
 				{
-					for(i=0; i<numofactor; i++)
+					if(!xmlStrcmp(act->name, (const xmlChar*)"char") && !xmlStrcmp(userchoice->name, (const xmlChar*)"index"))
 					{
-						if(strcmp(s->dls[current_line].actor, s->chs[i].name) == 0)
+						actor = xmlNodeGetContent(act);
+						index = xmlNodeGetContent(userchoice);
+					
+						for(i=0; i<numofactor; i++)
 						{
-							voice = s->chs[i].voice;
-							break;
+							if(!xmlStrcmp(actor, (const xmlChar*)(s->chs[i].name)))
+							{
+								printf("%s\n", index);
+								s->chs[i].speaker = atoi(index);
+								break;
+							}
 						}
+						
+						free(actor);
+						free(index);
+
 					}
 
-					line = s->dls[current_line].line;
-					current_line++;
-					cur_line_count++;
-					
-					sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-					printf("%s\n", buf);
-					sendto(speaker_sd[0].server_sock, buf, strlen(buf)+1, 0,
-							(struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
+					act = act->next;
+					userchoice = userchoice->next;
+
+				}
 				
-					usleep(100000);
-				}
-				else
-				{
-					index++;
-					break;
-				}
-			}
-		}
-
-		printf("----------------------\n");
-
-		if(current_line != 0)
-		{
-			int line_sum = 0;
-			while(line_sum != prev_line_count)
-			{
-				recvfrom(recv_sd.server_sock, buf, BUFSIZE, 0,
-						(struct sockaddr*)&(recv_sd.server_addr), &(recv_sd.client_addr_size));
-				line_sum += atoi(buf);
+				xmlFree(title);
+				break;
 			}
 
-
-			prev_line_count = cur_line_count;
-			cur_line_count = 0;
+			xmlFree(title);
 		}
-		else
-			sleep(5);
 
-		if(current_line == numofline)
-			break;
+		tag_script = tag_script->next;
 	}
-	*/
 
-	/*	
-	printf("%s\n", s->title);
-	printf("%lf, %d, %d, %d\n", s->version, s->numofactor, s->numofdialogue, s->numofline);
-	for(int i=0; i<s->numofactor;i++)
-		printf("%s, %d, %d\n", s->chs[i].name, s->chs[i].gender, s->chs[i].age);
-	
-	for(int i=0; i<s->numofline; i++)
-		printf("%d. %s : %s\n", s->dls[i].index, s->chs[s->dls[i].actor].name, s->dls[i].line);
-
-	for(int i=0; i<s->numofdialogue; i++)
-		printf("%d ", s->linecount_per_dialogue[i]);
-	printf("\n");
-	*/
-	/*
-	//for(int i=0; i<s->numofline;i++)
-	for(int i=0; i<3; i++)
+	if(tag_script == NULL)
 	{
-		sprintf(buf, "2_ko-KR-Standard-%s_%s", "A", s->dls[i].line);
-		
-		sendto(speaker_sd[0].server_sock, buf, strlen(buf)+1, 0,
-			(struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
-		
-		sleep(1);
-		
-		printf("%s\n", buf);
-
-		sendto(speaker_sd[0].server_sock, "3", strlen("3")+1, 0,
-			(struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
-
-		recvfrom(recv_sd.server_sock, buf, BUFSIZE, 0,
-			(struct sockaddr*)&(recv_sd.server_addr), &(recv_sd.client_addr_size));
+		fprintf(stderr, "cannot find role script : %s\n", docname);
+		xmlFreeDoc(doc);
+		return -1;
 	}
-	*/		
-/*
-	printf("end story\n");
-
-	free(s->dls);
-	free(s->chs);
-	free(s->linecount_per_dialogue);
-	free(s);
+	else
+	{
+		xmlFreeDoc(doc);
+		return 0;
+	}
 }
-
-*/
