@@ -50,16 +50,18 @@ int main(int argc, char** argv)
 	story* s;
 	s = parsedoc(docname);
 
-	/*
+	
 	printf("%s\n", s->title);
 	printf("%lf, %d, %d, %d\n", s->version, s->numofactor, s->numofdialogue, s->numofline);
 	for(int i=0; i<s->numofactor;i++)
 		printf("%s, %d, %d\n", s->chs[i].name, s->chs[i].gender, s->chs[i].age);
 	for(int i=0; i<s->numofline;i++)
 		printf("%d. %s : %s\n", s->dls[i].index, s->dls[i].actor, s->dls[i].line);
-*/
+
+	
 	init();
 
+	/*
 	for(int i=0; i<s->numofline; i++)
 	{
 		calltts(s->dls[i].line);
@@ -69,7 +71,7 @@ int main(int argc, char** argv)
 	free(s->dls);
 	free(s->chs);
 	free(s);
-
+*/
 	if(Py_FinalizeEx()<0)
 		return 120;
 
