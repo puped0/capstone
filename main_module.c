@@ -84,6 +84,7 @@ char ip[10][20];
 int ip_count;
 
 int ispause;
+int isplaying;
 int isstop;
 
 int main()
@@ -91,6 +92,8 @@ int main()
 	char msg[BUFSIZE];
 	char* token[10];
 	int i;
+	
+	int status;
 
 	init();
 
@@ -111,11 +114,15 @@ int main()
 		// 대본 시작
 		else if(atoi(token[0]) == 2)
 		{
-			player_id = pthread_create(&player_thread, NULL, playstory, (void*)token[1]);
-			if(player_id < 0)
+			if(isplaying == 0)
 			{
-				perror("thread create error : ");
-				exit(0);
+				isplaying = 1;
+				player_id = pthread_create(&player_thread, NULL, playstory, (void*)token[1]);
+				if(player_id < 0)
+				{
+					perror("thread create error : ");
+					exit(0);
+				}
 			}
 		}
 		else if(atoi(token[0]) == 3)
@@ -129,6 +136,13 @@ int main()
 		else if(atoi(token[0]) == 5)
 		{
 			// 대본 완전 정지
+			if(isplaying == 1)
+			{
+				isstop = 1;
+				pthread_join(player_thread, (void**)&status);
+				isstop = 0;
+			}
+	
 		}
 		else if(atoi(token[0]) == 100)
 		{
@@ -164,6 +178,10 @@ void init()
 
 	struct timeval optval = {5, 0};
 	int optlen = sizeof(optval);
+
+	isplaying = 0;
+	ispause = 0;
+	isstop = 0;
 
 	xmlDocPtr ipdoc;
 	xmlNodePtr cur;
@@ -572,7 +590,7 @@ void* playstory(void* data)
 	int speaker_idx;
 
 	char buf[BUFSIZE];
-	int i;
+	int i, j;
 
 	if(parserole(title, s) == -1)
 	{
@@ -650,6 +668,21 @@ void* playstory(void* data)
 
 		sendto(speaker_sd[0].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
 		
+		/*		
+		for(j=0; j<ip_count; i++)
+			sendto(speaker_sd[j].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
+		*/
+
+		// stop
+		if(isstop == 1)
+		{
+			while(line_sum != prev_line_count)
+			{
+				recvfrom(recv_sd.server_sock, buf, BUFSIZE, 0, (struct sockaddr*)&(recv_sd.server_addr), &(recv_sd.client_addr_size));
+				line_sum = line_sum + atoi(buf);
+			}
+			break;
+		}
 
 		while(current_dialogue == s->dls[current_line].index && current_dialogue != numofdialogue)
 		{
@@ -692,6 +725,8 @@ void* playstory(void* data)
 	free(s->chs);
 	free(s->linecount_per_dialogue);
 	free(s);
+
+	isplaying = 0;
 }
 
 int parserole(char* docname, story* s)
