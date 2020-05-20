@@ -101,11 +101,11 @@ int main()
 
 	while(1)
 	{
-		readmsg(msg);
+		// readmsg(msg);
 
 		////////////////////////////
-	//	fgets(msg, BUFSIZE, stdin);
-	//	msg[strlen(msg)-1] = 0;		
+		fgets(msg, BUFSIZE, stdin);
+		msg[strlen(msg)-1] = 0;		
 		////////////////////////////
 
 		maketoken(msg, token);
@@ -209,8 +209,7 @@ void init()
 	ispause = 0;
 	isstop = 0;
 
-	printf("test1\n");
-	
+	/*
 	sd.server_sock = socket(PF_INET, SOCK_STREAM, 0);
 	if(sd.server_sock == -1)
 		error_handling("socket() error");
@@ -234,14 +233,13 @@ void init()
 	sd.client_sock = accept(sd.server_sock, (struct sockaddr*)&(sd.client_addr), &(sd.client_addr_size));
 	if(sd.client_sock == -1)
 		error_handling("accept() error");
-	
+	*/
 	///////////////////////////////
 
 	recv_sd.server_sock = socket(PF_INET, SOCK_DGRAM, 0);
 	if(recv_sd.server_sock == -1)
 		error_handling("sock() error(udp)");
 
-	printf("test2\n");
 
 	memset(&(recv_sd.server_addr), 0 , sizeof(struct sockaddr_in));
 	recv_sd.server_addr.sin_family = AF_INET;
@@ -564,7 +562,7 @@ void check_connection(char* testip)
 
 	if(res != -1)
 	{
-		write(sd.server_sock, "true", strlen("true")+1);
+//		write(sd.server_sock, "true", strlen("true")+1);
 		
 		if(exist == 0)
 		{
@@ -576,7 +574,7 @@ void check_connection(char* testip)
 	}
 	else
 	{
-		write(sd.server_sock, "false", strlen("false")+1);
+//		write(sd.server_sock, "false", strlen("false")+1);
 		
 		if(exist == 0)		
 			close(speaker_sd[i].server_sock);
@@ -703,6 +701,8 @@ void* playstory(void* data)
 	{
 		int line_sum = 0;
 
+//		sendto(speaker_sd[0].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[0].server_addr), sizeof(struct sockaddr_in));
+		
 		for(j=0; j<ip_count; j++)
 			sendto(speaker_sd[j].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
 
