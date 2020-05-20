@@ -209,8 +209,6 @@ void init()
 	ispause = 0;
 	isstop = 0;
 
-	printf("test1\n");
-	
 	sd.server_sock = socket(PF_INET, SOCK_STREAM, 0);
 	if(sd.server_sock == -1)
 		error_handling("socket() error");
@@ -241,7 +239,7 @@ void init()
 	if(recv_sd.server_sock == -1)
 		error_handling("sock() error(udp)");
 
-	printf("test2\n");
+	printf("socket connected\n");
 
 	memset(&(recv_sd.server_addr), 0 , sizeof(struct sockaddr_in));
 	recv_sd.server_addr.sin_family = AF_INET;
@@ -255,7 +253,7 @@ void init()
 
 	ip_count = 0;
 
-	ipdoc = xmlParseFile("ip.xml");
+	ipdoc = xmlParseFile("/home/pi/capston-web/servers/xml/ip.xml");
 	if(ipdoc == NULL)
 	{
 		fprintf(stderr, "Document not parsed successfully.\n");
@@ -590,9 +588,9 @@ void check_connection(char* testip)
 void* playstory(void* data)
 {
 	char* title = (char*)data;
-	char docname[100];
+	char docname[100] = "/home/pi/capston-web/servers/xml/";
 
-	strncpy(docname, title, sizeof(docname));
+	strcat(docname, title);
 	strcat(docname, ".xml");
 	
 	story* s = parsedoc(docname);
@@ -786,7 +784,7 @@ int parserole(char* docname, story* s)
 	int i;
 
 
-	doc = xmlParseFile("role.xml");
+	doc = xmlParseFile("/home/pi/capston-web/servers/xml/roll.xml");
 	if(doc == NULL)
 	{
 		fprintf(stderr, "Document not parsed successfully.\n");
