@@ -38,6 +38,10 @@ int maketoken(char* msg, char** token);
 void* createvoice(void* data);
 void* speaking(void* data);
 
+void stopline();
+void pauseline();
+void unpauseline();
+
 pthread_t wav_create_thread[10];
 int wav_create_id[10];
 
@@ -67,7 +71,7 @@ int main()
 	while(1)
 	{
 		readmsg(&sd, msg);
-		
+		printf("%d : %s\n", index, msg);	
 		//////////////////////////
 	//	printf("get : ");
 	//	fgets(msg, BUFSIZE, stdin);
@@ -115,18 +119,66 @@ int main()
 		// 이번 차례에 생성된 음성파일 재생
 		else if(atoi(token[0]) == 3)
 		{
+			if(index != 0)
+			{
+				/******************/
+				gilState = PyGILState_Ensure();
+				/******************/
+
+				speaker_id = pthread_create(&speaker_thread, NULL, speaking, (void*)index);
+				if(speaker_id < 0)
+				perror("thread create error : ");
+				/***************/
+				PyGILState_Release(gilState);
+				/***************/	
+	
+				index = 0;
+			}
+		}
+		else if(atoi(token[0]) == 4)
+		{
+			// 대본이 정지됨
+			// 대본이 정지되어 index를 0으로 초기화
+			// 뜬금없이 대사가 나오는 것을 방지
+			
 			/******************/
 			gilState = PyGILState_Ensure();
 			/******************/
 
-			speaker_id = pthread_create(&speaker_thread, NULL, speaking, (void*)index);
-			if(speaker_id < 0)
-				perror("thread create error : ");
+			stopline();
+	
 			/***************/
 			PyGILState_Release(gilState);
 			/***************/	
-
+			
 			index = 0;
+		}
+		else if(atoi(token[0]) == 5)
+		{
+			// 대사 일시정지
+			/******************/
+			gilState = PyGILState_Ensure();
+			/******************/
+	
+			pauseline();
+	
+			/***************/
+			PyGILState_Release(gilState);
+			/***************/	
+	
+		}
+		else if(atoi(token[0]) == 6)
+		{
+			// 대사 다시재생
+			/******************/
+			gilState = PyGILState_Ensure();
+			/******************/
+	 
+			unpauseline();
+	
+			/***************/
+			PyGILState_Release(gilState);
+			/***************/	
 		}
 		else if(atoi(token[0]) == 100)
 			break;
@@ -313,6 +365,9 @@ void* createvoice(void* data)
 
 	free(data);
 
+	sd.client_addr.sin_port = htons(10002);
+	sendto(sd.sock, "1", strlen("1")+1, 0, (struct sockaddr*)&(sd.client_addr), sd.client_addr_size);
+
 	/*****************************/
 	PyGILState_Release(gilState);
 	/*****************************/
@@ -400,4 +455,19 @@ void* speaking(void* data)
 	/****************************/
 
 	return (void*)0;
+}
+
+void stopline()
+{
+	PyRun_SimpleString("pygame.mixer.stop()");
+}
+
+void pauseline()
+{
+	PyRun_SimpleString("pygame.mixer.pause()");
+}
+
+void unpauseline()
+{
+	PyRun_SimpleString("pygame.mixer.unpause()");
 }

@@ -51,7 +51,7 @@ typedef struct tagstory
 	int numofdialogue;
 	int numofline;
 
-	int* linecount_per_dialogue;
+	int* lineindex_per_dialogue;
 
 	character* chs;
 	dialogue* dls;
@@ -78,6 +78,7 @@ socketdata speaker_sd[10];
 socketdata recv_sd;
 
 pthread_mutex_t pause_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t offset_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t player_thread;
 int player_id;
 
@@ -88,12 +89,15 @@ int ip_count;
 int ispause;
 int isplaying;
 int isstop;
+int isjump;
+
+int dialogue_offset;
 
 int main()
 {
 	char msg[BUFSIZE];
 	char* token[10];
-	int i;
+	int i,j;
 	
 	int status;
 
@@ -102,8 +106,10 @@ int main()
 	while(1)
 	{
 		readmsg(msg);
+		printf("msg : %s\n", msg);
 
 		////////////////////////////
+	//	printf("msg : ");
 	//	fgets(msg, BUFSIZE, stdin);
 	//	msg[strlen(msg)-1] = 0;		
 		////////////////////////////
@@ -130,10 +136,13 @@ int main()
 		else if(atoi(token[0]) == 3)
 		{
 			// 대본 일시 정지
-			if(ispause == 0)
+			if(ispause == 0 && isplaying == 1)
 			{
 				pthread_mutex_lock(&pause_mutex);
+				for(j=0; j<ip_count; j++)
+					sendto(speaker_sd[j].server_sock, "5", strlen("5")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
 				ispause = 1;
+				printf("pause\n");
 			}
 
 
@@ -141,28 +150,54 @@ int main()
 		else if(atoi(token[0]) == 4)
 		{
 			// 일시정지 상태에서 재생
-			if(ispause == 1)
+			if(ispause == 1 && isplaying == 1)
 			{
 				pthread_mutex_unlock(&pause_mutex);
+				for(j=0; j<ip_count; j++)
+					sendto(speaker_sd[j].server_sock, "6", strlen("6")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
 				ispause = 0;
+				printf("play\n");
 			}
 		}
 		else if(atoi(token[0]) == 5)
 		{
 			// 대본 완전 정지
-			if(isplaying == 1)
+			if(isplaying == 1 && isstop == 0)
 			{
+				isstop = 1;
 				if(ispause == 1)
 				{
 					pthread_mutex_unlock(&pause_mutex);
 					ispause = 0;
 				}
-
-				isstop = 1;
+			
+				for(j=0; j<ip_count; j++)
+					sendto(speaker_sd[j].server_sock, "4", strlen("4")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
+				
 				pthread_join(player_thread, (void**)&status);
 				isstop = 0;
+				printf("stop\n");
 			}
 	
+		}
+		else if(atoi(token[0]) == 6)
+		{
+			if(isjump == 1)
+			{
+				pthread_mutex_lock(&offset_mutex);
+				dialogue_offset--;
+				pthread_mutex_unlock(&offset_mutex);
+			}
+
+		}
+		else if(atoi(token[0]) == 7)
+		{
+			if(isjump == 1)
+			{
+				pthread_mutex_lock(&offset_mutex);
+				dialogue_offset++;
+				pthread_mutex_unlock(&offset_mutex);
+			}
 		}
 		else if(atoi(token[0]) == 100)
 		{
@@ -183,6 +218,7 @@ int main()
 	close(sd.client_sock);
 
 	pthread_mutex_destroy(&pause_mutex);
+	pthread_mutex_destroy(&offset_mutex);
 
 	return 0;
 }
@@ -197,7 +233,7 @@ void error_handling(char* msg)
 void init()
 {
 	int i;
-
+	
 	struct timeval optval = {5, 0};
 	int optlen = sizeof(optval);
 
@@ -205,9 +241,12 @@ void init()
 	xmlNodePtr cur;
 	xmlChar* content;
 
+
 	isplaying = 0;
 	ispause = 0;
 	isstop = 0;
+	
+	printf("web connecting...\n");
 
 	sd.server_sock = socket(PF_INET, SOCK_STREAM, 0);
 	if(sd.server_sock == -1)
@@ -216,6 +255,8 @@ void init()
 	// int option = 1;
 	// setsockopt(sd.server_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
+		
+	
 	memset(&(sd.server_addr), 0, sizeof(sd.server_addr));
 	sd.server_addr.sin_family = AF_INET;
 	sd.server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -233,13 +274,13 @@ void init()
 	if(sd.client_sock == -1)
 		error_handling("accept() error");
 	
+	printf("web connected\n");
 	///////////////////////////////
+	
 
 	recv_sd.server_sock = socket(PF_INET, SOCK_DGRAM, 0);
 	if(recv_sd.server_sock == -1)
 		error_handling("sock() error(udp)");
-
-	printf("socket connected\n");
 
 	memset(&(recv_sd.server_addr), 0 , sizeof(struct sockaddr_in));
 	recv_sd.server_addr.sin_family = AF_INET;
@@ -469,8 +510,9 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 	int cur_index = 0;
 
 	s->dls = (dialogue*)malloc(sizeof(dialogue)*s->numofline);
-	s->linecount_per_dialogue = (int*)malloc(sizeof(int)*s->numofdialogue);
-	
+	s->lineindex_per_dialogue = (int*)malloc(sizeof(int)*s->numofdialogue);
+	memset(s->lineindex_per_dialogue, 0, sizeof(int)*s->numofdialogue);
+
 	cur = cur->xmlChildrenNode;
 
 	while(cur!=NULL)
@@ -499,7 +541,7 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 			
 			if(cur_index != s->dls[i].index)
 			{
-				s->linecount_per_dialogue[cur_index] = linecount;
+				s->lineindex_per_dialogue[cur_index+1] = s->lineindex_per_dialogue[cur_index] + linecount;
 				linecount = 1;
 				cur_index++;
 			}
@@ -516,8 +558,6 @@ void parsescript(xmlDocPtr doc, xmlNodePtr cur, story* s)
 
 		cur = cur->next;
 	}
-
-	s->linecount_per_dialogue[cur_index] = linecount;
 }
 
 void check_connection(char* testip)
@@ -560,10 +600,12 @@ void check_connection(char* testip)
 	sendto(speaker_sd[i].server_sock, "1", strlen("1")+1, 0, (struct sockaddr*)&(speaker_sd[i].server_addr), sizeof(struct sockaddr_in));
 	res = recvfrom(speaker_sd[i].server_sock, buf, BUFSIZE, 0, (struct sockaddr*)&(speaker_sd[i].server_addr),&( speaker_sd[i].client_addr_size));
 
+	printf("test1, %d\n", res);
+
 	if(res != -1)
 	{
-		write(sd.server_sock, "true", strlen("true")+1);
-		
+		write(sd.client_sock, "true", strlen("true"));
+		printf("test2-1, res = %d\n", res);
 		if(exist == 0)
 		{
 			ip_count++;
@@ -574,8 +616,8 @@ void check_connection(char* testip)
 	}
 	else
 	{
-		write(sd.server_sock, "false", strlen("false")+1);
-		
+		write(sd.client_sock, "false", strlen("false"));
+		printf("test2-2, res = %d\n", res);
 		if(exist == 0)		
 			close(speaker_sd[i].server_sock);
 
@@ -614,11 +656,13 @@ void* playstory(void* data)
 	char buf[BUFSIZE];
 	int i, j;
 
+	dialogue_offset = 0;
+
 	if(parserole(title, s) == -1)
 	{
 		free(s->dls);
 		free(s->chs);
-		free(s->linecount_per_dialogue);
+		free(s->lineindex_per_dialogue);
 		free(s);
 
 		return NULL;
@@ -651,13 +695,16 @@ void* playstory(void* data)
 
 	for(int i=0; i<s->numofline; i++)
 		printf("%d. %s : %s\n", s->dls[i].index, s->chs[s->dls[i].actor].name, s->dls[i].line);
-
+	
 	for(int i=0; i<s->numofdialogue; i++)
-		printf("%d ", s->linecount_per_dialogue[i]);
+		printf("%d : %d\n",i, s->lineindex_per_dialogue[i]);
 	printf("\n");
 	*/
 
+	for(j=0; j<ip_count; j++)
+		sendto(speaker_sd[j].server_sock, "4", strlen("4")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
 	
+
 	while(current_dialogue == s->dls[current_line].index)
 	{
 		voice = s->chs[s->dls[current_line].actor].voice;
@@ -695,7 +742,7 @@ void* playstory(void* data)
 	prev_line_count = current_line_count;
 	current_line_count = 0;
 
-	sleep(3);
+	isjump = 1;
 
 	while(1)
 	{
@@ -704,7 +751,10 @@ void* playstory(void* data)
 		for(j=0; j<ip_count; j++)
 			sendto(speaker_sd[j].server_sock, "3", strlen("3")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
 
+		/*
 		// pause
+		// 대사기 끝난 직후에 pause를 누르면 정상적으로 정지하지 않는다.
+		// 그 때를 대비해 뮤텍스가 필요하다.
 		if(ispause == 1)
 		{
 			pthread_mutex_lock(&pause_mutex);
@@ -713,14 +763,26 @@ void* playstory(void* data)
 
 		// stop
 		if(isstop == 1)
-		{
-			while(line_sum != prev_line_count)
-			{
-				recvfrom(recv_sd.server_sock, buf, BUFSIZE, 0, (struct sockaddr*)&(recv_sd.server_addr), &(recv_sd.client_addr_size));
-				line_sum = line_sum + atoi(buf);
-			}
 			break;
+		*/
+		
+		if(dialogue_offset != 0)
+		{
+			pthread_mutex_lock(&offset_mutex);
+			if(current_dialogue + dialogue_offset < 0)
+				current_dialogue = 0;
+			else if(current_dialogue + dialogue_offset >= numofdialogue)
+				current_dialogue = numofdialogue - 1;
+			else
+				current_dialogue = current_dialogue + dialogue_offset;
+
+			dialogue_offset = 0;
+			pthread_mutex_unlock(&offset_mutex);
+
+			current_line = s->lineindex_per_dialogue[current_dialogue];
 		}
+		
+		printf("%d, %d\n", current_dialogue, current_line);
 
 		while(current_dialogue == s->dls[current_line].index && current_dialogue != numofdialogue)
 		{
@@ -754,16 +816,34 @@ void* playstory(void* data)
 
 		if(prev_line_count == 0)
 			break;
+
+		// pause
+		// 대사기 끝난 직후에 pause를 누르면 정상적으로 정지하지 않는다.
+		// 그 때를 대비해 뮤텍스가 필요하다.
+		if(ispause == 1)
+		{
+			pthread_mutex_lock(&pause_mutex);
+			pthread_mutex_unlock(&pause_mutex);
+		}		
+
+		// stop
+		if(isstop == 1)
+			break;
+
+
 	}
 	
 
+
+	write(sd.client_sock, "end", strlen("end"));
 	printf("end story\n");
 
 	free(s->dls);
 	free(s->chs);
-	free(s->linecount_per_dialogue);
+	free(s->lineindex_per_dialogue);
 	free(s);
 
+	isjump = 0;
 	isplaying = 0;
 }
 
@@ -784,7 +864,7 @@ int parserole(char* docname, story* s)
 	int i;
 
 
-	doc = xmlParseFile("/home/pi/capston-web/servers/xml/roll.xml");
+	doc = xmlParseFile("/home/pi/capston-web/servers/xml/role.xml");
 	if(doc == NULL)
 	{
 		fprintf(stderr, "Document not parsed successfully.\n");
