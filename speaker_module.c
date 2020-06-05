@@ -48,6 +48,8 @@ int wav_create_id[10];
 pthread_t speaker_thread;
 int speaker_id;
 
+int isspeaking;
+
 /******************************/
 PyThreadState* mainThreadState;
 /******************************/
@@ -140,45 +142,54 @@ int main()
 			// 대본이 정지됨
 			// 대본이 정지되어 index를 0으로 초기화
 			// 뜬금없이 대사가 나오는 것을 방지
-			
-			/******************/
-			gilState = PyGILState_Ensure();
-			/******************/
+		
+			if(isspeaking == 1)
+			{	
+				/******************/
+				gilState = PyGILState_Ensure();
+				/******************/
 
-			stopline();
-	
-			/***************/
-			PyGILState_Release(gilState);
-			/***************/	
-			
+				stopline();
+		
+				/***************/
+				PyGILState_Release(gilState);
+				/***************/	
+			}	
 			index = 0;
 		}
 		else if(atoi(token[0]) == 5)
 		{
 			// 대사 일시정지
-			/******************/
-			gilState = PyGILState_Ensure();
-			/******************/
-	
-			pauseline();
-	
-			/***************/
-			PyGILState_Release(gilState);
-			/***************/	
-	
+				
+			if(isspeaking == 1)
+			{
+				/******************/
+				gilState = PyGILState_Ensure();
+				/******************/
+		
+				pauseline();
+		
+				/***************/
+				PyGILState_Release(gilState);
+				/***************/	
+			}
 		}
 		else if(atoi(token[0]) == 6)
 		{
 			// 대사 다시재생
-			/******************/
-			gilState = PyGILState_Ensure();
-			/******************/
-	 
-			unpauseline();
-	
-			/***************/
-			PyGILState_Release(gilState);
-			/***************/	
+				
+			if(isspeaking == 1)
+			{
+				/******************/
+				gilState = PyGILState_Ensure();
+				/******************/
+		 
+				unpauseline();
+		
+				/***************/
+				PyGILState_Release(gilState);
+				/***************/	
+			}
 		}
 		else if(atoi(token[0]) == 100)
 			break;
@@ -211,6 +222,8 @@ void error_handling(char* msg)
 
 void init(socketdata* sd)
 {
+	isspeaking = 0;
+
 	sd->sock = socket(PF_INET, SOCK_DGRAM, 0);
 
 	if(sd->sock == -1)
@@ -236,8 +249,9 @@ void init(socketdata* sd)
 	PyRun_SimpleString("os.environ[\"GOOGLE_APPLICATION_CREDENTIALS\"]=\"/home/pi/TTS capstone-d09b840abc51.json\"");
 	PyRun_SimpleString("import pygame");
 	PyRun_SimpleString("import time");
-	PyRun_SimpleString("pygame.mixer.init(24000, -16, 1, 2048)");
 
+	PyRun_SimpleString("pygame.init()");
+	PyRun_SimpleString("pygame.mixer.init(24000, -16, 1, 2048)");
 	/********************************************/
 	Py_DECREF(PyImport_ImportModule("threading"));
 	PyEval_InitThreads();
@@ -384,6 +398,8 @@ void* speaking(void* data)
 
 	PyGILState_STATE gilState;
 
+	isspeaking = 1;
+
 	/****************************/
 	gilState = PyGILState_Ensure();
 	/****************************/
@@ -453,6 +469,8 @@ void* speaking(void* data)
 	/****************************/	
 	PyGILState_Release(gilState);
 	/****************************/
+	
+	isspeaking = 0;
 
 	return (void*)0;
 }
