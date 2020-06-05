@@ -1,20 +1,20 @@
 
 import pygame
 import time
+from google.cloud import texttospeech
 
 def tts_func(index, voice, line):
     filename = 'output'+str(index)+'.wav';
-
-    from google.cloud import texttospeech
+    
     client = texttospeech.TextToSpeechClient()
-    input = texttospeech.types.SynthesisInput(text=line)
-    voice = texttospeech.types.VoiceSelectionParams(
+    input = texttospeech.SynthesisInput(text=line)
+    voice = texttospeech.VoiceSelectionParams(
     language_code='ko-KR',
         name=voice,
-        ssml_gender=texttospeech.enums.SsmlVoiceGender.NEUTRAL)
+        ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL)
 
-    audio_config = texttospeech.types.AudioConfig(
-            audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16)	
+    audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.LINEAR16)	
     response = client.synthesize_speech(input, voice, audio_config)
 
     with open(filename, 'wb') as out:
