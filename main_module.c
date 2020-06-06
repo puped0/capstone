@@ -89,6 +89,8 @@ int ip_count;
 int ispause;
 int isplaying;
 int isstop;
+
+// 대사 점프가 가능한 코드에서 1로 초기화
 int isjump;
 
 int dialogue_offset;
@@ -185,6 +187,9 @@ int main()
 			if(isjump == 1)
 			{
 				pthread_mutex_lock(&offset_mutex);
+				for(j=0; j<ip_count; j++)
+					sendto(speaker_sd[j].server_sock, "4", strlen("4")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
+
 				dialogue_offset--;
 				pthread_mutex_unlock(&offset_mutex);
 			}
@@ -195,6 +200,9 @@ int main()
 			if(isjump == 1)
 			{
 				pthread_mutex_lock(&offset_mutex);
+				for(j=0; j<ip_count; j++)
+					sendto(speaker_sd[j].server_sock, "4", strlen("4")+1, 0, (struct sockaddr*)&(speaker_sd[j].server_addr), sizeof(struct sockaddr_in));
+
 				dialogue_offset++;
 				pthread_mutex_unlock(&offset_mutex);
 			}
@@ -281,6 +289,8 @@ void init()
 	recv_sd.server_sock = socket(PF_INET, SOCK_DGRAM, 0);
 	if(recv_sd.server_sock == -1)
 		error_handling("sock() error(udp)");
+
+	printf("socket connected\n");
 
 	memset(&(recv_sd.server_addr), 0 , sizeof(struct sockaddr_in));
 	recv_sd.server_addr.sin_family = AF_INET;
@@ -715,7 +725,7 @@ void* playstory(void* data)
 		current_line_count++;
 
 		sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-		printf("%d : %s\n",speaker_idx, buf);
+		printf("%d %d : %s\n",current_dialoug, speaker_idx, buf);
 
 		sendto(speaker_sd[speaker_idx].server_sock, buf, strlen(buf)+1, 0,
 			(struct sockaddr*)&(speaker_sd[speaker_idx].server_addr), sizeof(struct sockaddr_in));
@@ -766,8 +776,10 @@ void* playstory(void* data)
 			break;
 		*/
 		
+			
 		if(dialogue_offset != 0)
 		{
+			sleep(1);
 			pthread_mutex_lock(&offset_mutex);
 			if(current_dialogue + dialogue_offset < 0)
 				current_dialogue = 0;
@@ -777,12 +789,12 @@ void* playstory(void* data)
 				current_dialogue = current_dialogue + dialogue_offset;
 
 			dialogue_offset = 0;
+			prev_line_count = 0;
 			pthread_mutex_unlock(&offset_mutex);
 
 			current_line = s->lineindex_per_dialogue[current_dialogue];
 		}
 		
-		printf("%d, %d\n", current_dialogue, current_line);
 
 		while(current_dialogue == s->dls[current_line].index && current_dialogue != numofdialogue)
 		{
@@ -794,7 +806,7 @@ void* playstory(void* data)
 			current_line_count++;
 
 			sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-			printf("%d : %s\n",speaker_idx, buf);
+			printf("%d %d : %s\n",current_dialogue, speaker_idx, buf);
 			
 			// 역할별로 다른 스피커에 전송할 수도 있음... 추후 구현
 			sendto(speaker_sd[speaker_idx].server_sock, buf, strlen(buf)+1, 0, (struct sockaddr*)&(speaker_sd[speaker_idx].server_addr), sizeof(struct sockaddr_in));
@@ -830,10 +842,7 @@ void* playstory(void* data)
 		if(isstop == 1)
 			break;
 
-
 	}
-	
-
 
 	write(sd.client_sock, "end", strlen("end"));
 	printf("end story\n");
@@ -865,6 +874,7 @@ int parserole(char* docname, story* s)
 
 
 	doc = xmlParseFile("/home/pi/capston-web/servers/xml/role.xml");
+	
 	if(doc == NULL)
 	{
 		fprintf(stderr, "Document not parsed successfully.\n");
