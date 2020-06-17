@@ -227,7 +227,8 @@ int main()
 
 	pthread_mutex_destroy(&pause_mutex);
 	pthread_mutex_destroy(&offset_mutex);
-
+	
+	system("sudo poweroff");
 	return 0;
 }
 
@@ -725,7 +726,7 @@ void* playstory(void* data)
 		current_line_count++;
 
 		sprintf(buf, "2_ko-KR-Standard-%s_%s", voice, line);
-		printf("%d %d : %s\n",current_dialoug, speaker_idx, buf);
+		printf("%d %d : %s\n",current_dialogue, speaker_idx, buf);
 
 		sendto(speaker_sd[speaker_idx].server_sock, buf, strlen(buf)+1, 0,
 			(struct sockaddr*)&(speaker_sd[speaker_idx].server_addr), sizeof(struct sockaddr_in));

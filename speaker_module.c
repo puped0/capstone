@@ -210,6 +210,7 @@ int main()
 		return 120;
 
 	close(sd.sock);
+	system("sudo poweroff");
 	return 0;
 }
 
