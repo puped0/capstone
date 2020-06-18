@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<format>
+	<title>짱구는못말려</title>
+	
+	<header>
+		<version>1.0</version>
+		<numofactor>4</numofactor>
+		<numofadialogue>8</numofadialogue>
+		<numofline>13</numofline>
+	</header>
+	
+	<characters>
+		<character name="AAA" gender="남자" age="10"></character>
+		<character name="BBB" gender="여자" age="11"></character>
+		<character name="CCC" gender="여자" age="35"></character>
+		<character name="DDD" gender="남자" age="25"></character>
+	</characters>
+	
+	<script>
+		<dialogue index="0">
+			<actor>AAA</actor>
+			<line>그러길래 내가 하지 말라고 했잖아!</line>
+		</dialogue>
+		
+		<dialogue index="1">
+			<actor>BBB</actor>
+			<line>뭐? 막상 할 땐 제일 먼저 나서던 녀석이!</line>
+		</dialogue>
+		<dialogue index="1">
+			<actor>AAA</actor>
+			<line>처음부터 이런 일에 끼어는게 아니었어!</line>
+		</dialogue>
+		
+		<dialogue index="2">
+			<actor>AAA</actor>
+			<line>내가 언제 제일 먼저 나섰어, 너가 제일 적극적이었잖아!</line>
+		</dialogue>
+		<dialogue index="2">
+			<actor>BBB</actor>
+			<line>니가 제대로만 했어도 이렇게까지 되진 않았어!</line>
+		</dialogue>
+		<dialogue index="2">
+			<actor>CCC</actor>
+			<line>얘들아 싸우지마</line>
+		</dialogue>
+		
+		<dialogue index="3">
+			<actor>CCC</actor>
+			<line>애들아 싸울때가 아니야, 이걸 어떻게든 수습해야지</line>
+		</dialogue>
+	
+		<dialogue index="4">
+			<actor>DDD</actor>
+			<line>맞아 얘들아 깨진 그릇은 내가 담아볼께</line>
+		</dialogue>
+		<dialogue index="4">
+			<actor>CCC</actor>
+			<line>잠깐만 기다려 내가 빗자루 갖고올께</line>
+		</dialogue>
+		
+		<dialogue index="5">
+			<actor>AAA</actor>
+			<line>너가 엎었으니까 너가 정리해야지</line>
+		</dialogue>
+	
+		<dialogue index="6">
+			<actor>BBB</actor>
+			<line>이걸 내가 어떻게 다 정리해! 그리고 너도 잘못이 있잖아!</line>
+		</dialogue>
+		
+		<dialogue index="7">
+			<actor>AAA</actor>
+			<line>아 몰라! 네가 알아서 해!</line>
+		</dialogue>
+		<dialogue index="7">
+			<actor>BBB</actor>
+			<line>이게 진짜!</line>
+		</dialogue>
+	</script>
+</format>

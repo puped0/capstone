@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<format>
+	<title>헨젤과그레텔</title>
+	
+	<header>
+		<version>1.0</version>
+		<numofactor>5</numofactor>
+		<numofadialogue>48</numofadialogue>
+		<numofline>48</numofline>
+	</header>
+	
+	<characters>
+		<character name="헨젤" gender="남자" age="11"></character>
+		<character name="그레텔" gender="여자" age="10"></character>
+		<character name="나레이션" gender="남자" age="35"></character>
+		<character name="새엄마" gender="여자" age="25"></character>
+		<character name="마녀" gender="여자" age="40"></character>
+	</characters>
+	
+	<script>
+		<dialogue index="0">
+			<actor>새엄마</actor>
+			<line>헨젤, 그레텔! 이제 다 왔구나.</line>
+		</dialogue>
+		
+		<dialogue index="1">
+			<actor>그레텔</actor>
+			<line>그런데 여기가 어디에요?</line>
+		</dialogue>
+		
+		<dialogue index="2">
+			<actor>새엄마</actor>
+			<line>숲속이야 숲속...</line>
+		</dialogue>
+		
+		<dialogue index="3">
+			<actor>헨젤</actor>
+			<line>좀 으시시한게 호랑이나 귀신이 나올것만 같은데...</line>
+		</dialogue>
+		
+		<dialogue index="4">
+			<actor>그레텔</actor>
+			<line>아이 무서워라.</line>
+		</dialogue>
+		
+		<dialogue index="5">
+			<actor>새엄마</actor>
+			<line>무섭긴 뭐가 무서워. 나무해 가지고 돌아 올테니 여기서 꼼짝말고 기다려라. 알았니 알았냐고?</line>
+		</dialogue>
+		
+		<dialogue index="6">
+			<actor>헨젤</actor>
+			<line>네, 엄마 빨리 오세요.</line>
+		</dialogue>
+		
+		<dialogue index="7">
+			<actor>나레이션</actor>
+			<line>시간이 흘러서 밤이 오고 있었어요. 그러나 엄마 아빠는 헨젤과 그레텔에게 오시지를 않았어요. 사실은 집안이 너무 가난해서 먹을 것이 없으니까. 헨젤과 그레텔을 깊은 숲속에다 버리고 가버린 것이였어요.</line>
+		</dialogue>
+		
+		<dialogue index="8">
+			<actor>그레텔</actor>
+			<line>아이참, 오빠... 밤이 오는데 왜 엄마와 아빠는 안오시는거지?</line>
+		</dialogue>
+		
+		<dialogue index="9">
+			<actor>헨젤</actor>
+			<line>글쎄 말이야... 아이 추워.</line>
+		</dialogue>
+		
+		<dialogue index="10">
+			<actor>그레텔</actor>
+			<line>오빠...만약 엄마가 안오시면 어떻하지? 난 몰라, 무서운 짐승이나 귀신이 나올것 같애. 무서워 오빠.</line>
+		</dialogue>
+		
+		<dialogue index="11">
+			<actor>헨젤</actor>
+			<line>걱정하지마,그래텔. 내가 이럴줄알고 아까 오는 길에다 돌을 떨어뜨려놨거든.</line>
+		</dialogue>
+		
+		<dialogue index="12">
+			<actor>그레텔</actor>
+			<line>오빠! 그러니까 돌을 따라가면 집에 갈 수 있는거야? 와 신난다. 우리 오빠 최고야.</line>
+		</dialogue>
+		
+		<dialogue index="13">
+			<actor>헨젤</actor>
+			<line>어서 돌을 따라 집으로 가자.</line>
+		</dialogue>
+		
+		<dialogue index="14">
+			<actor>그레텔</actor>
+			<line>그래 어서 집으로 가 오빠.</line>
+		</dialogue>
+		
+		<dialogue index="15">
+			<actor>나레이션</actor>
+			<line>헨젤과 그레텔은 무사히 집으로 돌아왔지만, 새엄마는 또 다시 헨젤과 그레텔을 더 깊은 산속에다 버리고 가버렸어요.</line>
+		</dialogue>
+		
+		<dialogue index="16">
+			<actor>그레텔</actor>
+			<line>오빠, 이번에는 정말 길을 잃어버린 것같애.</line>
+		</dialogue>
+		
+		<dialogue index="17">
+			<actor>헨젤</actor>
+			<line>야, 내가 누구니? 걱정하지마. 이 오라버니가 길에다가 맛있는 빵조각을 떨어뜨려놨거든...</line>
+		</dialogue>
+		<dialogue index="18">
+			<actor>그레텔</actor>
+			<line>그러니까 빵조각을 따라가면 집에 갈 수 있단말이지? 역시 우리오빠는 대단해.</line>
+		</dialogue>
+		
+		<dialogue index="19">
+			<actor>헨젤</actor>
+			<line>자, 어서 가자!</line>
+		</dialogue>
+		
+		<dialogue index="20">
+			<actor>그레텔</actor>
+			<line>그런데 오빠, 빵조각이 안보여, 새들이 다 먹어버렸나봐...</line>
+		</dialogue>
+		
+		<dialogue index="21">
+			<actor>헨젤</actor>
+			<line>뭐,뭐라고? 그럼, 어떻하지...정말 큰일났네...</line>
+		</dialogue>
+		
+		<dialogue index="22">
+			<actor>그레텔</actor>
+			<line>오빠, 무서워...으흐흐흐...</line>
+		</dialogue>
+		
+		<dialogue index="23">
+			<actor>나레이션</actor>
+			<line>두사람은 몇일동안 산속을 울면서 헤메고 다녔어요. 그러던 어느날, 저 멀리서 반짝이는 불을 발견하게 되었어요.</line>
+		</dialogue>
+		
+		<dialogue index="24">
+			<actor>그레텔</actor>
+			<line>오빠! 저기 저기좀 봐, 불빛이 보이네...</line>
+		</dialogue>
+		
+		<dialogue index="25">
+			<actor>헨젤</actor>
+			<line>뭐? 불빛...우와 이제 우리는 살았다. 그레텔, 빨리 가보자.</line>
+		</dialogue>
+		
+		<dialogue index="26">
+			<actor>그레텔</actor>
+			<line>우와,오빠! 이것좀 봐. 집이 완전히 맛있는 과자와 빵이야...</line>
+		</dialogue>
+		
+		<dialogue index="27">
+			<actor>헨젤</actor>
+			<line>와, 쵸코렛과 케익....먹자,먹어. 와, 정말 맛있네..</line>
+		</dialogue>
+		
+		<dialogue index="28">
+			<actor>마녀</actor>
+			<line>아니, 내 집을 먹는 놈들이 누구야? 잡았다. 요놈들, 어서 들어와!</line>
+		</dialogue>
+		
+		<dialogue index="29">
+			<actor>그레텔</actor>
+			<line>살려주세요 마녀님.</line>
+		</dialogue>
+		
+		<dialogue index="30">
+			<actor>마녀</actor>
+			<line>그래그래 살이 포동포동 오를 때까지는 살려주마. 이히히히히.</line>
+		</dialogue>
+		
+		<dialogue index="31">
+			<actor>나레이션</actor>
+			<line>헨젤과 그레텔은 마녀에게 잡혀 헨젤은 감옥에 갖혔고, 그레텔은 마녀의 부엌에서 일을 하게되었어요.</line>
+		</dialogue>
+		
+		<dialogue index="32">
+			<actor>마녀</actor>
+			<line>이히히히- 몇일이 지났으니 살이 포동포동 올랐을꺼야. 그레텔!</line>
+		</dialogue>
+		
+		<dialogue index="33">
+			<actor>그레텔</actor>
+			<line>부르셨어요 마녀님.</line>
+		</dialogue>
+		
+		<dialogue index="34">
+			<actor>마녀</actor>
+			<line>큰 솥에다 물을 넣고,불을 훨훨 지피도록 하여라.</line>
+		</dialogue>
+		
+		<dialogue index="35">
+			<actor>그레텔</actor>
+			<line>그런데 마녀님, 불은 어떻게 지피지요?</line>
+		</dialogue>
+		
+		<dialogue index="36">
+			<actor>마녀</actor>
+			<line>이런 멍청한 것. 불은 가까이서 이렇게 지피는거야. 이렇게...</line>
+		</dialogue>
+		
+		<dialogue index="37">
+			<actor>그레텔</actor>
+			<line>어떻게요?</line>
+		</dialogue>
+		
+		<dialogue index="38">
+			<actor>마녀</actor>
+			<line>아, 이렇게 하는거라니까.</line>
+		</dialogue>
+		
+		<dialogue index="39">
+			<actor>그레텔</actor>
+			<line>아, 이렇게요..</line>
+		</dialogue>
+		
+		<dialogue index="40">
+			<actor>그레텔</actor>
+			<line>이 때야 마녀를 펄펄 끓는 가마솥에 밀어 넣어야지. 에잇, 이 나쁜 마녀야 죽어라. 죽어. 이야앗...</line>
+		</dialogue>
+		
+		<dialogue index="41">
+			<actor>마녀</actor>
+			<line>으아앗, 밀지마 밀지말란말이야. 으... 마녀살려. 살려줘...다시는 안그럴께...</line>
+		</dialogue>
+		
+		<dialogue index="42">
+			<actor>그레텔</actor>
+			<line>오빠, 빨리 나와. 내가 마녀를 가마솥에 밀어넣었어.</line>
+		</dialogue>
+		
+		<dialogue index="43">
+			<actor>헨젤</actor>
+			<line>우와, 넌 정말 용감하구나.</line>
+		</dialogue>
+		
+		<dialogue index="44">
+			<actor>그레텔</actor>
+			<line>오빠,이제 마녀가 죽었으니 이 많은 보물들은 우리 것이야, 자 이 보물들을 가지고 아빠한테 돌아가자.</line>
+		</dialogue>
+		
+		<dialogue index="45">
+			<actor>헨젤</actor>
+			<line>와, 정말 신나는데... 그래 그래, 어서 가자. 여러분! 우리는 이제 부자예요 부자. 그레텔, 어서 가자</line>
+		</dialogue>
+		
+		<dialogue index="46">
+			<actor>그레텔</actor>
+			<line>그래 오빠!</line>
+		</dialogue>
+		
+		<dialogue index="47">
+			<actor>나레이션</actor>
+			<line>헨젤과 그레텔은 많은 보물을 가지고 집으로 돌아와 아주 재미있게 살았습니다.</line>
+		</dialogue>	
+	
+	</script>
+</format>
